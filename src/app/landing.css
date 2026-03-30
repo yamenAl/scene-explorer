@@ -32,45 +32,6 @@
   border: 0;
 }
 
-.lp-scene-loading {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: rgba(3, 6, 16, 0.82);
-  pointer-events: none;
-}
-
-.lp-scene-loading-bar {
-  height: 4px;
-  width: 10rem;
-  max-width: 45%;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(0, 245, 255, 0.12);
-}
-
-.lp-scene-loading-bar::after {
-  content: "";
-  display: block;
-  height: 100%;
-  width: 40%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, var(--lp-cyan), transparent);
-  animation: lp-loading-shimmer 2.6s ease-in-out infinite;
-}
-
-.lp-scene-loading-label {
-  font-family: var(--font-share-tech-mono), monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.35em;
-  color: #5a7a9a;
-}
-
 .lp-bg-film {
   position: fixed;
   inset: 0;
@@ -479,15 +440,6 @@
   background: rgba(0, 245, 255, 0.08);
   box-shadow: var(--lp-glow-cyan);
   transform: translateY(-2px);
-}
-
-@keyframes lp-loading-shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(350%);
-  }
 }
 
 @keyframes lp-blob-float {

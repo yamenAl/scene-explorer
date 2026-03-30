@@ -1,22 +1,30 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SCENE_BACKDROP_MIN_LOADING_MS } from "@/lib/scene";
+
+export type SceneLoadStatus = { ready: boolean; src: string };
 
 type SceneBackdropProps = {
   src: string;
   /** When false, backdrop is inert and the iframe is not tab-focusable (landing overlay). */
   interactive?: boolean;
+  /** Fired when this `src` starts loading or when the load gate completes (`ready`). */
+  onLoadStatus?: (status: SceneLoadStatus) => void;
 };
 
 /**
  * Full-viewport splat viewer behind the landing overlay (&noui).
  */
 export const SceneBackdrop = forwardRef<HTMLIFrameElement, SceneBackdropProps>(
-  function SceneBackdrop({ src, interactive = false }, ref) {
+  function SceneBackdrop({ src, interactive = false, onLoadStatus }, ref) {
     const [loaded, setLoaded] = useState(false);
     const loadStartedAt = useRef(0);
     const revealTimeoutRef = useRef<number | null>(null);
+
+    useLayoutEffect(() => {
+      onLoadStatus?.({ ready: false, src });
+    }, [src, onLoadStatus]);
 
     useEffect(() => {
       setLoaded(false);
@@ -34,6 +42,10 @@ export const SceneBackdrop = forwardRef<HTMLIFrameElement, SceneBackdropProps>(
         }
       };
     }, [src]);
+
+    useEffect(() => {
+      onLoadStatus?.({ ready: loaded, src });
+    }, [loaded, src, onLoadStatus]);
 
     const scheduleReveal = () => {
       if (revealTimeoutRef.current) {
@@ -54,16 +66,6 @@ export const SceneBackdrop = forwardRef<HTMLIFrameElement, SceneBackdropProps>(
         // (even `inert="false"`), so never pass `inert={false}` — omit the attribute instead.
         {...(!interactive ? { inert: true as const } : {})}
       >
-        {!loaded && (
-          <div
-            className="lp-scene-loading"
-            aria-busy="true"
-            aria-label="Loading 3D scene"
-          >
-            <div className="lp-scene-loading-bar" />
-            <p className="lp-scene-loading-label">LOADING</p>
-          </div>
-        )}
         <iframe
           ref={ref}
           key={src}

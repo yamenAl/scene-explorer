@@ -31,14 +31,22 @@ function updateTicks(container: HTMLElement | null, pct: number) {
   });
 }
 
-export function LandingLoader() {
+export type LandingLoaderProps = {
+  /** When true, the splat iframe has finished its load gate (see SceneBackdrop). */
+  sceneReady: boolean;
+};
+
+export function LandingLoader({ sceneReady }: LandingLoaderProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
   const pctRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<HTMLSpanElement>(null);
   const ticksRef = useRef<HTMLDivElement>(null);
+  const sceneReadyRef = useRef(sceneReady);
   const [mounted, setMounted] = useState(true);
+
+  sceneReadyRef.current = sceneReady;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -53,37 +61,64 @@ export function LandingLoader() {
 
     const progress = { value: 0 };
     let aborted = false;
+    let rafWait = 0;
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        defaults: { ease: "none" },
+      const updateUi = () => {
+        if (aborted) return;
+        const current = Math.round(progress.value);
+        fill.style.width = `${current}%`;
+        pctEl.innerHTML = `${current}<sup>%</sup>`;
+        const ph = phaseForProgress(current);
+        phaseEl.textContent = ph.label;
+        termEl.textContent = ph.msg;
+        updateTicks(ticksEl, current);
+      };
+
+      const fadeOutAndUnmount = () => {
+        gsap.to(root, {
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.inOut",
+          onComplete: () => {
+            document.body.style.overflow = "";
+            if (!aborted) setMounted(false);
+          },
+        });
+      };
+
+      gsap.to(progress, {
+        value: 92,
+        duration: 2.4,
+        ease: "power2.inOut",
+        onUpdate: updateUi,
         onComplete: () => {
-          document.body.style.overflow = "";
-          if (!aborted) setMounted(false);
-        },
-      });
-
-      tl.to(progress, {
-        value: 100,
-        duration: 2.8,
-        ease: "power3.inOut",
-        onUpdate: () => {
           if (aborted) return;
-          const current = Math.round(progress.value);
-          fill.style.width = `${current}%`;
-          pctEl.innerHTML = `${current}<sup>%</sup>`;
-          const ph = phaseForProgress(current);
-          phaseEl.textContent = ph.label;
-          termEl.textContent = ph.msg;
-          updateTicks(ticksEl, current);
+          const waitLoop = () => {
+            if (aborted) return;
+            if (sceneReadyRef.current) {
+              gsap.to(progress, {
+                value: 100,
+                duration: 0.45,
+                ease: "power2.out",
+                onUpdate: updateUi,
+                onComplete: () => {
+                  if (aborted) return;
+                  gsap.delayedCall(0.35, fadeOutAndUnmount);
+                },
+              });
+            } else {
+              rafWait = requestAnimationFrame(waitLoop);
+            }
+          };
+          waitLoop();
         },
       });
-
-      tl.to(root, { opacity: 0, duration: 0.6, ease: "power2.inOut" }, "+=0.35");
     }, root);
 
     return () => {
       aborted = true;
+      cancelAnimationFrame(rafWait);
       ctx.revert();
       document.body.style.overflow = "";
     };

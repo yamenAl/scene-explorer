@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BRAND_LOGO_FIRST, BRAND_LOGO_SECOND } from "@/lib/brand";
 import { LandingLoader } from "@/components/landing/LandingLoader";
-import { SceneBackdrop } from "@/components/landing/SceneBackdrop";
+import { SceneBackdrop, type SceneLoadStatus } from "@/components/landing/SceneBackdrop";
 import {
   landingBackdropUrlAtIndex,
   landingSceneLabel,
@@ -24,7 +24,10 @@ export function LandingPage({ initialBackdropIndex }: LandingPageProps) {
   const router = useRouter();
   const [backdropIdx, setBackdropIdx] = useState(initialBackdropIndex);
   const [inScene, setInScene] = useState(false);
+  const [sceneLoad, setSceneLoad] = useState<SceneLoadStatus | null>(null);
   const backdropSrc = landingBackdropUrlAtIndex(backdropIdx);
+  const sceneReadyForLoader =
+    sceneLoad !== null && sceneLoad.ready && sceneLoad.src === backdropSrc;
   const nextBackdropHref = `/?b=${nextLandingBackdropIndex(backdropIdx)}`;
   const sceneLabel = landingSceneLabel(backdropSrc);
   const sceneIframeRef = useRef<HTMLIFrameElement>(null);
@@ -58,7 +61,7 @@ export function LandingPage({ initialBackdropIndex }: LandingPageProps) {
     requestAnimationFrame(focusIframe);
     const t = window.setTimeout(focusIframe, 120);
     return () => window.clearTimeout(t);
-  }, [inScene]);
+  }, [inScene, backdropSrc]);
 
   useEffect(() => {
     if (!inScene) return;
@@ -234,8 +237,14 @@ export function LandingPage({ initialBackdropIndex }: LandingPageProps) {
 
   return (
     <div className={`lp${inScene ? " lp--in-scene" : ""}`}>
-      <LandingLoader />
-      <SceneBackdrop ref={sceneIframeRef} src={backdropSrc} interactive={inScene} />
+      <LandingLoader key={`loader-${backdropIdx}`} sceneReady={sceneReadyForLoader} />
+      <SceneBackdrop
+        key={`scene-${backdropIdx}`}
+        ref={sceneIframeRef}
+        src={backdropSrc}
+        interactive={inScene}
+        onLoadStatus={setSceneLoad}
+      />
       {/* ~30% transparent: old #030610 film so scene barely shows through */}
       <div className="lp-bg-film" aria-hidden />
 
