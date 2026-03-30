@@ -1,31 +1,23 @@
 "use client";
 
 /**
- * Full-screen SuperSplat iframe + corner controls.
- *
- * Hotspots: defined in public/splat-settings.json (annotations). The iframe loads
- * ?settings=<your origin>/splat-settings.json so the viewer can fetch them (CORS in next.config).
+ * Full-screen iframe using SuperSplat’s embed URL:
+ * https://superspl.at/s?id=08ef0b52
  */
 
 import { useEffect, useRef, useState } from "react";
-import { SCENE_PAGE_URL, SETTINGS_PATH, viewerUrlWithSettings } from "@/lib/scene";
+import { SCENE_PAGE_URL, VIEWER_URL } from "@/lib/scene";
 
-const HELP_AUTO_HIDE_MS = 14_000;
+const HELP_AUTO_HIDE_MS = 12_000;
 
 const cornerBtnClass =
   "pointer-events-auto rounded border border-zinc-700/90 bg-black/75 px-2.5 py-1.5 font-mono text-[11px] text-zinc-300 backdrop-blur-sm hover:border-zinc-500 hover:text-white";
 
 export function SuperSplatEmbed() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showHelp, setShowHelp] = useState(true);
-
-  useEffect(() => {
-    const settingsUrl = new URL(SETTINGS_PATH, window.location.origin).href;
-    setIframeSrc(viewerUrlWithSettings(settingsUrl));
-  }, []);
 
   async function onFullscreenClick() {
     const el = rootRef.current;
@@ -37,7 +29,7 @@ export function SuperSplatEmbed() {
         await el.requestFullscreen();
       }
     } catch {
-      // Browser blocked fullscreen (permissions, etc.)
+      // Browser blocked fullscreen
     }
   }
 
@@ -70,17 +62,16 @@ export function SuperSplatEmbed() {
         </div>
       )}
 
-      {iframeSrc && (
-        <iframe
-          title="3D room viewer"
-          src={iframeSrc}
-          className="absolute inset-0 h-full w-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; xr-spatial-tracking"
-          allowFullScreen
-          loading="eager"
-          onLoad={() => setIframeLoaded(true)}
-        />
-      )}
+      <iframe
+        id="viewer"
+        title="SuperSplat viewer"
+        src={VIEWER_URL}
+        className="absolute inset-0 h-full w-full border-0"
+        allow="fullscreen; xr-spatial-tracking"
+        allowFullScreen
+        loading="eager"
+        onLoad={() => setIframeLoaded(true)}
+      />
 
       <div className="pointer-events-none absolute right-3 top-3 z-20 flex gap-2 md:right-4 md:top-4">
         <button
@@ -107,11 +98,10 @@ export function SuperSplatEmbed() {
       {showHelp && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center p-4 md:p-6">
           <div className="pointer-events-auto max-w-lg rounded-lg border border-zinc-700/80 bg-black/80 px-4 py-3 text-sm text-zinc-300 shadow-lg backdrop-blur-md">
-            <p className="font-medium text-zinc-100">Explore and read</p>
+            <p className="font-medium text-zinc-100">Controls</p>
             <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              Numbered circles are hotspots — click one to open a short description. Walk with WASD
-              after clicking the scene; use the viewer bar to switch orbit / fly / walk if needed.
-              Edit copy and positions in <code className="text-zinc-300">public/splat-settings.json</code>.
+              Use the bar inside the viewer for orbit, fly, or walk. Click the 3D view first if WASD does
+              not respond.
             </p>
             <button
               type="button"
