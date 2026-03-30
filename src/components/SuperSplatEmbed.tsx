@@ -1,9 +1,6 @@
 "use client";
 
-/**
- * Full-screen iframe using SuperSplat’s embed URL:
- * https://superspl.at/s?id=08ef0b52
- */
+/** Full-screen iframe; URL uses &noui so SuperSplat hides its control bar. */
 
 import { useEffect, useRef, useState } from "react";
 import { SCENE_PAGE_URL, VIEWER_URL } from "@/lib/scene";
@@ -100,8 +97,11 @@ export function SuperSplatEmbed() {
           <div className="pointer-events-auto max-w-lg rounded-lg border border-zinc-700/80 bg-black/80 px-4 py-3 text-sm text-zinc-300 shadow-lg backdrop-blur-md">
             <p className="font-medium text-zinc-100">Controls</p>
             <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              Use the bar inside the viewer for orbit, fly, or walk. Click the 3D view first if WASD does
-              not respond.
+              Click the 3D view so keys go to the viewer. WASD to walk (when in walk mode). Keys{" "}
+              <kbd className="rounded border border-zinc-600 bg-zinc-900 px-1">1</kbd>{" "}
+              <kbd className="rounded border border-zinc-600 bg-zinc-900 px-1">2</kbd>{" "}
+              <kbd className="rounded border border-zinc-600 bg-zinc-900 px-1">3</kbd> switch orbit, fly,
+              and walk if you need them (SuperSplat shortcuts).
             </p>
             <button
               type="button"
