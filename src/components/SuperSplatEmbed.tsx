@@ -1,25 +1,31 @@
 "use client";
 
 /**
- * Full-screen SuperSplat iframe + a few HTML controls on top.
+ * Full-screen SuperSplat iframe + corner controls.
  *
- * The iframe loads VIEWER_URL (see src/lib/scene.ts). Clicks on the page go
- * to our buttons; clicks on the iframe go to the 3D viewer (WASD, mouse look).
+ * Hotspots: defined in public/splat-settings.json (annotations). The iframe loads
+ * ?settings=<your origin>/splat-settings.json so the viewer can fetch them (CORS in next.config).
  */
 
 import { useEffect, useRef, useState } from "react";
-import { SCENE_PAGE_URL, VIEWER_URL } from "@/lib/scene";
+import { SCENE_PAGE_URL, SETTINGS_PATH, viewerUrlWithSettings } from "@/lib/scene";
 
-const HELP_AUTO_HIDE_MS = 12_000;
+const HELP_AUTO_HIDE_MS = 14_000;
 
 const cornerBtnClass =
   "pointer-events-auto rounded border border-zinc-700/90 bg-black/75 px-2.5 py-1.5 font-mono text-[11px] text-zinc-300 backdrop-blur-sm hover:border-zinc-500 hover:text-white";
 
 export function SuperSplatEmbed() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showHelp, setShowHelp] = useState(true);
+
+  useEffect(() => {
+    const settingsUrl = new URL(SETTINGS_PATH, window.location.origin).href;
+    setIframeSrc(viewerUrlWithSettings(settingsUrl));
+  }, []);
 
   async function onFullscreenClick() {
     const el = rootRef.current;
@@ -51,7 +57,6 @@ export function SuperSplatEmbed() {
 
   return (
     <div ref={rootRef} className="relative h-svh w-full overflow-hidden bg-black">
-      {/* Loading layer sits above the iframe until it fires onLoad */}
       {!iframeLoaded && (
         <div
           className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black"
@@ -65,17 +70,18 @@ export function SuperSplatEmbed() {
         </div>
       )}
 
-      <iframe
-        title="3D room viewer"
-        src={VIEWER_URL}
-        className="absolute inset-0 h-full w-full border-0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; xr-spatial-tracking"
-        allowFullScreen
-        loading="eager"
-        onLoad={() => setIframeLoaded(true)}
-      />
+      {iframeSrc && (
+        <iframe
+          title="3D room viewer"
+          src={iframeSrc}
+          className="absolute inset-0 h-full w-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; xr-spatial-tracking"
+          allowFullScreen
+          loading="eager"
+          onLoad={() => setIframeLoaded(true)}
+        />
+      )}
 
-      {/* Wrapper ignores clicks except on the real controls (pointer-events-auto) */}
       <div className="pointer-events-none absolute right-3 top-3 z-20 flex gap-2 md:right-4 md:top-4">
         <button
           type="button"
@@ -101,10 +107,11 @@ export function SuperSplatEmbed() {
       {showHelp && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center p-4 md:p-6">
           <div className="pointer-events-auto max-w-lg rounded-lg border border-zinc-700/80 bg-black/80 px-4 py-3 text-sm text-zinc-300 shadow-lg backdrop-blur-md">
-            <p className="font-medium text-zinc-100">How to move</p>
+            <p className="font-medium text-zinc-100">Explore and read</p>
             <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              Click inside the 3D view once. Then use WASD to walk and the mouse to look
-              around.
+              Numbered circles are hotspots — click one to open a short description. Walk with WASD
+              after clicking the scene; use the viewer bar to switch orbit / fly / walk if needed.
+              Edit copy and positions in <code className="text-zinc-300">public/splat-settings.json</code>.
             </p>
             <button
               type="button"
