@@ -1,9 +1,11 @@
 "use client";
 
-/** Full-screen iframe; URL uses &noui so SuperSplat hides its control bar. */
+/**
+ * SuperSplat iframe only: /s?id=…&noui. No ?settings=, no links to superspl.at in this UI.
+ */
 
 import { useEffect, useRef, useState } from "react";
-import { SCENE_PAGE_URL, VIEWER_URL } from "@/lib/scene";
+import { VIEWER_URL } from "@/lib/scene";
 
 const HELP_AUTO_HIDE_MS = 12_000;
 
@@ -44,15 +46,20 @@ export function SuperSplatEmbed() {
     return () => window.clearTimeout(id);
   }, [showHelp]);
 
+  useEffect(() => {
+    const t = window.setTimeout(() => setIframeLoaded(true), 5000);
+    return () => window.clearTimeout(t);
+  }, []);
+
   return (
-    <div ref={rootRef} className="relative h-svh w-full overflow-hidden bg-black">
+    <div ref={rootRef} className="relative h-svh w-full overflow-hidden bg-zinc-950">
       {!iframeLoaded && (
         <div
-          className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black"
+          className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center gap-3 bg-zinc-950"
           aria-busy="true"
           aria-label="Loading"
         >
-          <div className="h-1 w-40 max-w-[50%] overflow-hidden rounded-full bg-zinc-900">
+          <div className="h-1 w-40 max-w-[50%] overflow-hidden rounded-full bg-zinc-800">
             <div className="h-full w-1/3 animate-cyber-shimmer rounded-full bg-[linear-gradient(90deg,transparent,var(--cyber-cyan),transparent)]" />
           </div>
           <p className="font-mono text-[10px] tracking-widest text-zinc-500">LOADING</p>
@@ -61,10 +68,10 @@ export function SuperSplatEmbed() {
 
       <iframe
         id="viewer"
-        title="SuperSplat viewer"
+        title="3D scene"
         src={VIEWER_URL}
-        className="absolute inset-0 h-full w-full border-0"
-        allow="fullscreen; xr-spatial-tracking"
+        className="pointer-events-auto absolute inset-0 z-10 h-full w-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; xr-spatial-tracking; web-share"
         allowFullScreen
         loading="eager"
         onLoad={() => setIframeLoaded(true)}
@@ -82,14 +89,6 @@ export function SuperSplatEmbed() {
         <button type="button" className={cornerBtnClass} onClick={onFullscreenClick}>
           {isFullscreen ? "Exit" : "Fullscreen"}
         </button>
-        <a
-          className={`${cornerBtnClass} text-zinc-400 hover:text-zinc-200`}
-          href={SCENE_PAGE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          SuperSplat
-        </a>
       </div>
 
       {showHelp && (
@@ -97,11 +96,11 @@ export function SuperSplatEmbed() {
           <div className="pointer-events-auto max-w-lg rounded-lg border border-zinc-700/80 bg-black/80 px-4 py-3 text-sm text-zinc-300 shadow-lg backdrop-blur-md">
             <p className="font-medium text-zinc-100">Controls</p>
             <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              Click the 3D view so keys go to the viewer. WASD to walk (when in walk mode). Keys{" "}
+              Click inside the view first. Keys{" "}
               <kbd className="rounded border border-zinc-600 bg-zinc-900 px-1">1</kbd>{" "}
               <kbd className="rounded border border-zinc-600 bg-zinc-900 px-1">2</kbd>{" "}
               <kbd className="rounded border border-zinc-600 bg-zinc-900 px-1">3</kbd> switch orbit, fly,
-              and walk if you need them (SuperSplat shortcuts).
+              and walk.
             </p>
             <button
               type="button"

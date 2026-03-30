@@ -5,10 +5,7 @@
 export const SCENE_ID = "08ef0b52";
 
 /**
- * Viewer with ?noui — hides SuperSplat’s bottom bar (orbit / fly / walk / settings / etc.).
- * @see https://github.com/playcanvas/supersplat-viewer#user-content-url-parameters
+ * &noui hides SuperSplat’s #ui: bottom controls, branding, etc.
+ * Do not add ?settings= — that re-enables embedded branding and is not used here.
  */
 export const VIEWER_URL = `https://superspl.at/s?id=${SCENE_ID}&noui`;
-
-/** Full scene page on SuperSplat (share, comments). */
-export const SCENE_PAGE_URL = `https://superspl.at/scene/${SCENE_ID}`;
