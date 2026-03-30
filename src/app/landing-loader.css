@@ -1,0 +1,342 @@
+/* Full-screen boot loader (GSAP-driven). Flat selectors for broad tooling support. */
+
+.lp-loader {
+  --lp-loader-cyan: #00f5ff;
+  --lp-loader-magenta: #ff00c8;
+  --lp-loader-purple: #7b00ff;
+  --lp-loader-text: #c8d8f0;
+  --lp-loader-glow-cyan: 0 0 10px #00f5ff, 0 0 40px #00f5ff44, 0 0 80px #00f5ff22;
+  --lp-loader-glow-magenta: 0 0 10px #ff00c8, 0 0 40px #ff00c844;
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--lp-z-loader, 10000);
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.lp-loader.lp-loader__scan::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(0, 0, 0, 0.25) 3px,
+    rgba(0, 0, 0, 0.25) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+  animation: lp-loader-scan-move 6s linear infinite;
+}
+
+.lp-loader.lp-loader__scan::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 245, 255, 0.03);
+  animation: lp-loader-flicker 5s step-end infinite;
+  z-index: 1;
+}
+
+.lp-loader__corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  z-index: 2;
+}
+
+.lp-loader__corner::before,
+.lp-loader__corner::after {
+  content: "";
+  position: absolute;
+  background: var(--lp-loader-cyan);
+  box-shadow: var(--lp-loader-glow-cyan);
+}
+
+.lp-loader__corner::before {
+  width: 100%;
+  height: 2px;
+  top: 0;
+  left: 0;
+}
+
+.lp-loader__corner::after {
+  width: 2px;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.lp-loader__corner--tl {
+  top: 24px;
+  left: 24px;
+}
+
+.lp-loader__corner--tr {
+  top: 24px;
+  right: 24px;
+  transform: scaleX(-1);
+}
+
+.lp-loader__corner--bl {
+  bottom: 24px;
+  left: 24px;
+  transform: scaleY(-1);
+}
+
+.lp-loader__corner--br {
+  bottom: 24px;
+  right: 24px;
+  transform: scale(-1);
+}
+
+.lp-loader__inner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.4rem;
+}
+
+.lp-loader__logo {
+  font-family: var(--font-orbitron), monospace;
+  font-weight: 900;
+  font-size: clamp(2rem, 6vw, 3.8rem);
+  letter-spacing: 0.2em;
+  color: #fff;
+  text-shadow: var(--lp-loader-glow-cyan);
+  animation: lp-loader-logo-glitch 3s ease infinite;
+}
+
+.lp-loader__logo span {
+  color: var(--lp-loader-magenta);
+  text-shadow: var(--lp-loader-glow-magenta);
+}
+
+.lp-loader__logo--tagline {
+  max-width: min(22rem, 92vw);
+  text-align: center;
+  line-height: 1.2;
+  font-size: clamp(1.35rem, 4.2vw, 2.35rem);
+  letter-spacing: 0.1em;
+}
+
+.lp-loader__logo--tagline span {
+  display: block;
+  margin-top: 0.35em;
+  letter-spacing: 0.12em;
+}
+
+.lp-loader__hex {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.lp-loader__hex svg {
+  width: 100%;
+  height: 100%;
+  animation: lp-loader-hex-spin 2.5s linear infinite;
+  filter: drop-shadow(0 0 8px var(--lp-loader-cyan));
+}
+
+.lp-loader__hex-inner {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 245, 255, 0.25), transparent 70%);
+  animation: lp-loader-pulse 1.5s ease-in-out infinite alternate;
+}
+
+.lp-loader__terminal {
+  font-family: var(--font-share-tech-mono), monospace;
+  font-size: 0.8rem;
+  color: #00f5ffaa;
+  letter-spacing: 0.08em;
+  text-align: center;
+  min-height: 1.4em;
+}
+
+.lp-loader__bar-wrap {
+  width: min(420px, 80vw);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lp-loader__bar-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-share-tech-mono), monospace;
+  font-size: 0.7rem;
+  color: #3a6a8a;
+  letter-spacing: 0.1em;
+}
+
+.lp-loader__bar-track {
+  height: 3px;
+  background: rgba(0, 245, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.lp-loader__bar-fill {
+  position: relative;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--lp-loader-cyan), var(--lp-loader-magenta));
+  box-shadow: 0 0 12px var(--lp-loader-cyan);
+  border-radius: 2px;
+}
+
+.lp-loader__bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: lp-loader-shimmer 1s ease-in-out infinite;
+}
+
+.lp-loader__ticks {
+  display: flex;
+  gap: 4px;
+}
+
+.lp-loader__tick {
+  flex: 1;
+  height: 4px;
+  background: rgba(0, 245, 255, 0.08);
+  border-radius: 1px;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
+}
+
+.lp-loader__tick--active {
+  background: var(--lp-loader-cyan);
+  box-shadow: 0 0 6px var(--lp-loader-cyan);
+}
+
+.lp-loader__pct {
+  font-family: var(--font-orbitron), monospace;
+  font-weight: 900;
+  font-size: 3rem;
+  color: var(--lp-loader-cyan);
+  text-shadow: var(--lp-loader-glow-cyan);
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.lp-loader__pct sup {
+  font-size: 1rem;
+  vertical-align: super;
+  letter-spacing: 0;
+}
+
+@keyframes lp-loader-scan-move {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 80px;
+  }
+}
+
+@keyframes lp-loader-flicker {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  4% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  52% {
+    opacity: 1;
+  }
+  54% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 0;
+  }
+  82% {
+    opacity: 0.6;
+  }
+  84% {
+    opacity: 0;
+  }
+}
+
+@keyframes lp-loader-logo-glitch {
+  0%,
+  95%,
+  100% {
+    clip-path: none;
+    transform: translate(0);
+  }
+  96% {
+    clip-path: polygon(0 10%, 100% 10%, 100% 44%, 0 44%);
+    transform: translate(-4px, 2px);
+  }
+  97% {
+    clip-path: polygon(0 55%, 100% 55%, 100% 80%, 0 80%);
+    transform: translate(4px, -2px);
+  }
+  98% {
+    clip-path: none;
+    transform: translate(0);
+  }
+}
+
+@keyframes lp-loader-hex-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lp-loader-pulse {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lp-loader-shimmer {
+  from {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (scripting: none) {
+  .lp-loader {
+    display: none !important;
+  }
+}

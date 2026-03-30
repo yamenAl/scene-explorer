@@ -1,6 +1,25 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter, Orbitron, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
+import { BRAND } from "@/lib/brand";
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+});
+
+const shareTechMono = Share_Tech_Mono({
+  variable: "--font-share-tech-mono",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "600"],
+});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -8,12 +27,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "V's dormitory — SuperSplat",
+  title: `${BRAND} — Immersive 3D scene`,
   description:
-    "Interactive Gaussian splat viewer: Cyberpunk 2077 V's dormitory via SuperSplat.",
+    "Cyberpunk-styled landing and browser-native 3D gaussian splat exploration.",
   openGraph: {
-    title: "V's dormitory — SuperSplat",
-    url: "https://superspl.at/scene/08ef0b52",
+    title: `${BRAND} — Immersive 3D scene`,
   },
 };
 
@@ -25,9 +43,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${orbitron.variable} ${shareTechMono.variable} ${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
