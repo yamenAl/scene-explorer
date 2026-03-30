@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050508;
+  --foreground: #e4e4e7;
+  --cyber-cyan: #00f0ff;
+  --cyber-cyan-dim: #4dd4e8;
+  --cyber-cyan-glow: rgba(0, 240, 255, 0.45);
+  --cyber-magenta: #ff2d95;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --animate-cyber-shimmer: cyber-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes cyber-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
