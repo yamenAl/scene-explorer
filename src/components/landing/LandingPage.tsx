@@ -34,6 +34,7 @@ export function LandingPage({ initialBackdropIndex }: LandingPageProps) {
   const cursorRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const bgAudioRef = useRef<HTMLAudioElement>(null);
   const mx = useRef(0);
   const my = useRef(0);
   const rx = useRef(0);
@@ -71,6 +72,28 @@ export function LandingPage({ initialBackdropIndex }: LandingPageProps) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [inScene]);
+
+  useEffect(() => {
+    const audio = bgAudioRef.current;
+    if (!audio) return;
+    audio.volume = 0.01;
+
+    const tryPlay = async () => {
+      try {
+        await audio.play();
+      } catch {
+        // Browser blocked playback; keep listeners for the next gesture.
+      }
+    };
+
+    document.addEventListener("pointerdown", tryPlay, { passive: true });
+    document.addEventListener("keydown", tryPlay);
+
+    return () => {
+      document.removeEventListener("pointerdown", tryPlay);
+      document.removeEventListener("keydown", tryPlay);
+    };
+  }, []);
 
   useEffect(() => {
     if (inScene) return;
@@ -237,6 +260,7 @@ export function LandingPage({ initialBackdropIndex }: LandingPageProps) {
 
   return (
     <div className={`lp${inScene ? " lp--in-scene" : ""}`}>
+      <audio ref={bgAudioRef} src="/audio/Lunar_Breath.mp3" loop preload="auto" />
       <LandingLoader key={`loader-${backdropIdx}`} sceneReady={sceneReadyForLoader} />
       <SceneBackdrop
         key={`scene-${backdropIdx}`}
